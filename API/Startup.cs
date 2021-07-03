@@ -32,12 +32,16 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            //added by FRS 
+            //added by FRS for DB connection
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
             });
             ///
+
+            //added by FRS . this is to make sure .NET API accept calls from Angular
+            services.AddCors();
+            //
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -60,6 +64,9 @@ namespace API
 
             app.UseRouting();
 
+            //added by FRS. Must spefically be here. Order is important.this is to make sure .NET API accept calls from Angular
+            app.UseCors(policy=>policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            //
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
