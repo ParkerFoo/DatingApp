@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.Data;
+using API.Extensions;
+using API.interfaces;
+using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -12,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -32,16 +38,18 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            //added by FRS for DB connection
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlite(_config.GetConnectionString("DefaultConnection"));
-            });
-            ///
+           //added by FRS. we call our extension method which we've created
+            services.AddApplicationServices(_config);
 
             //added by FRS . this is to make sure .NET API accept calls from Angular
             services.AddCors();
             //
+            
+            //added by FRS. we call our extension method which we've created
+            services.AddIdentityServices(_config);
+        
+
+
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -67,6 +75,10 @@ namespace API
             //added by FRS. Must spefically be here. Order is important.this is to make sure .NET API accept calls from Angular
             app.UseCors(policy=>policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
             //
+
+            //ADDED BY FRS for pt44 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
